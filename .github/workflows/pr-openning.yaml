@@ -37,10 +37,16 @@ jobs:
       uses: docker/setup-buildx-action@v2
 
     - name: Run unit tests
-      run: echo  "TODO - Run unit tests"
+      run: poetry run pytest
 
     - name: Build Docker image
-      run: echo "TODO - Build docker image"
+      run: |
+        docker build -t team5 -
+        docker run -p 80:80 team5
 
     - name: Run integration tests
-      run: echo "TODO - Build docker image"
+      run: |
+        ./scripts/build.sh
+        ./scripts/integration_test.sh
+        ./scripts/release.sh
+        ./scripts/deploy.sh
