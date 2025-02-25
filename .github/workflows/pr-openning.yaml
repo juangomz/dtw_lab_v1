@@ -45,7 +45,7 @@ jobs:
 
     - name: Run integration tests
       run: |
-        ./scripts/build.sh
-        ./scripts/integration_test.sh
-        ./scripts/release.sh
-        ./scripts/deploy.sh
+        chmod +x ./scripts/build.sh
+        chmod +x ./scripts/integration_test.sh
+        chmod +x ./scripts/release.sh
+        chmod +x ./scripts/deploy.sh
