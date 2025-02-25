@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "dtw-lab"
+version = "0.2.0"
+description = "Digital Transformation Workshops lab"
+authors = ["Enrique Alejo <enrique.m.alejo@gmail.com>"]
+readme = "README.md"
+packages = [{include = "dtw_lab", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+seaborn = "^0.13.2"
+pandas = "^2.2.3"
+scikit-learn = "^1.6.0"
+requests = "^2.32.3"
+uvicorn = "^0.34.0"
+fastapi = "^0.115.7"
+toml = "^0.10.2"
+pytest = "^8.3.4"
+pytest-mock = "^3.14.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.scripts]
+start-server-dev = "dtw_lab.lab2:run_server(port=8000,reload=True)"
+start-server = "dtw_lab.lab2:run_server(reload=False,host='0.0.0.0')"
