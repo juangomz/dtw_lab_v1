@@ -1,0 +1,46 @@
+name: Feature Branches & PR Opening Worflow
+run-name: "Build and Test by @${{ github.actor }}"
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - "*.md"
+env:
+  LOGIN_SERVER: ${{ secrets.LOGIN_SERVER }}
+  TEAM_NUMBER: ${{ vars.TEAM_NUMBER }}
+  RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
+permissions: read-all
+jobs:
+  unit-build-and-integration:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Run unit tests
+      run: echo  "TODO - Run unit tests"
+
+    - name: Build Docker image
+      run: echo "TODO - Build docker image"
+
+    - name: Run integration tests
+      run: echo "TODO - Build docker image"
