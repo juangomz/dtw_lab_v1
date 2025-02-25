@@ -41,7 +41,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t team5 -
+        docker build -t team5 .
         docker run -p 80:80 team5
 
     - name: Run integration tests
