@@ -39,22 +39,16 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
-      # Docker login using registry username and password
-      - name: Docker login to registry
-        run: echo ${{ secrets.REGISTRY_PASSWORD }} | docker login ${{ secrets.LOGIN_SERVER }} --username ${{ secrets.REGISTRY_USERNAME }} --password-stdin
-
       - name: Build Docker image
         run: |
-          docker build -t $LOGIN_SERVER/team${TEAM_NUMBER}:${IMAGE_TAG} .
+          docker build -t team5 .
 
       - name: Run release script
         run: |
+          chmod +x ./scripts/build.sh
+          chmod +x ./scripts/integration_test.sh
           chmod +x ./scripts/release.sh
           ./scripts/release.sh $IMAGE_TAG
-
-      - name: Push Docker image to registry
-        run: |
-          docker push $LOGIN_SERVER/team${TEAM_NUMBER}:${IMAGE_TAG}
 
   deploy-to-dev:
     runs-on: ubuntu-latest
