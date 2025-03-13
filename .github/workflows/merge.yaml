@@ -48,3 +48,7 @@ jobs:
         chmod +x ./scripts/integration_test.sh
         chmod +x ./scripts/release.sh
         chmod +x ./scripts/deploy.sh
+        
+    - name: Run e2e test
+      run: |
+        chmod +x ./scripts/e2e_test.sh
