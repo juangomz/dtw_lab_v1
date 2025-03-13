@@ -7,11 +7,12 @@ on:
       - main
 
 env:
-  LOGIN_SERVER: ${{ secrets.LOGIN_SERVER }}
+  LOGIN_SERVER: ${{ secrets.LOGIN_SERVER }}  # Docker registry server (e.g., DockerHub or Azure registry)
   TEAM_NUMBER: ${{ vars.TEAM_NUMBER }}
   RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
-  IMAGE_TAG: ${{ github.sha }}  # Use commit SHA as tag
-  REGISTRY: ${{ secrets.REGISTRY }}  # Docker registry (e.g., Azure, DockerHub, etc.)
+  IMAGE_TAG: ${{ github.sha }}  # Use commit SHA as the image tag
+  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}  # Docker registry username
+  REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}  # Docker registry password
   DEV_API_KEY: ${{ secrets.DEV_API_KEY }}  # Secret for dev environment
 
 permissions: read-all
@@ -38,6 +39,10 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
+      # Docker login using registry username and password
+      - name: Docker login to registry
+        run: echo ${{ secrets.REGISTRY_PASSWORD }} | docker login ${{ secrets.LOGIN_SERVER }} --username ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+
       - name: Build Docker image
         run: |
           docker build -t $LOGIN_SERVER/team${TEAM_NUMBER}:${IMAGE_TAG} .
@@ -58,11 +63,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set up Azure CLI
+        uses: azure/setup-azurecli@v1
+
+      - name: Azure login using service principal
+        run: |
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
-
-      - name: Set up deployment environment variables
-        run: echo "DEPLOYMENT_STATUS=Deploying to Dev" >> $GITHUB_ENV
 
       - name: Deploy to Dev
         run: |
