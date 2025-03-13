@@ -1,11 +1,10 @@
-name: Feature Branches & PR Opening Worflow
+name: Feature Branches & Merge Worflow
 run-name: "Build and Test by @${{ github.actor }}"
 on:
-  pull_request:
+  push:
     branches:
-      - main
-    paths-ignore:
-      - "*.md"
+      -main
+
 env:
   LOGIN_SERVER: ${{ secrets.LOGIN_SERVER }}
   TEAM_NUMBER: ${{ vars.TEAM_NUMBER }}
@@ -47,3 +46,5 @@ jobs:
       run: |
         chmod +x ./scripts/build.sh
         chmod +x ./scripts/integration_test.sh
+        chmod +x ./scripts/release.sh
+        chmod +x ./scripts/deploy.sh
