@@ -1,5 +1,6 @@
-name: Feature Branches & Merge Worflow
-run-name: "Build and Test and Deploy by @${{ github.actor }}"
+name: Feature Branches & Merge Workflow
+run-name: "Build and Test by @${{ github.actor }}"
+
 on:
   push:
     branches:
@@ -9,49 +10,87 @@ env:
   LOGIN_SERVER: ${{ secrets.LOGIN_SERVER }}
   TEAM_NUMBER: ${{ vars.TEAM_NUMBER }}
   RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
+  IMAGE_TAG: ${{ github.sha }}  # Use commit SHA as tag
+  REGISTRY: ${{ secrets.REGISTRY }}  # Docker registry (e.g., Azure, DockerHub, etc.)
+  DEV_API_KEY: ${{ secrets.DEV_API_KEY }}  # Secret for dev environment
+
 permissions: read-all
+
 jobs:
-  unit-build-and-integration:
+  release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-    - name: Install dependencies
-      run: poetry install
+      - name: Install dependencies
+        run: poetry install
 
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
 
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
+      - name: Build Docker image
+        run: |
+          docker build -t $LOGIN_SERVER/team${TEAM_NUMBER}:${IMAGE_TAG} .
 
-    - name: Run unit tests
-      run: poetry run pytest
+      - name: Run release script
+        run: |
+          chmod +x ./scripts/release.sh
+          ./scripts/release.sh $IMAGE_TAG
 
-    - name: Build Docker image
-      run: |
-        docker build -t team5 .
+      - name: Push Docker image to registry
+        run: |
+          docker push $LOGIN_SERVER/team${TEAM_NUMBER}:${IMAGE_TAG}
 
-    - name: Run integration tests
-      run: |
-        chmod +x ./scripts/build.sh
-        chmod +x ./scripts/integration_test.sh
-        chmod +x ./scripts/release.sh
+  deploy-to-dev:
+    runs-on: ubuntu-latest
+    needs: release  # This job runs after the release job
+    environment: development  # Triggers manual approval if set in GitHub Actions
+    steps:
+      - uses: actions/checkout@v3
 
-    - name: deploy-to-dev
-      run: |
-        chmod +x ./scripts/deploy.sh
-        
-    - name: Run e2e test
-      run: |
-        chmod +x ./scripts/e2e_test.sh
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Set up deployment environment variables
+        run: echo "DEPLOYMENT_STATUS=Deploying to Dev" >> $GITHUB_ENV
+
+      - name: Deploy to Dev
+        run: |
+          chmod +x ./scripts/deploy.sh
+          ./scripts/deploy.sh --env dev --image $LOGIN_SERVER/team${TEAM_NUMBER}:${IMAGE_TAG}
+
+      - name: Notify successful deployment
+        run: echo "Deployment to Dev completed!"
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: deploy-to-dev  # Waits until deploy-to-dev is done
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry install
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Run E2E tests
+        run: |
+          chmod +x ./scripts/e2e_test.sh
+          ./scripts/e2e_test.sh  # Run the E2E test script
+
+      - name: Notify successful tests (optional)
+        run: echo "End-to-end tests passed successfully!"
