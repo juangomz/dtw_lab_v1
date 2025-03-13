@@ -1,5 +1,5 @@
 name: Feature Branches & Merge Worflow
-run-name: "Build and Test by @${{ github.actor }}"
+run-name: "Build and Test and Deploy by @${{ github.actor }}"
 on:
   push:
     branches:
@@ -47,6 +47,9 @@ jobs:
         chmod +x ./scripts/build.sh
         chmod +x ./scripts/integration_test.sh
         chmod +x ./scripts/release.sh
+
+    - name: deploy-to-dev
+      run: |
         chmod +x ./scripts/deploy.sh
         
     - name: Run e2e test
