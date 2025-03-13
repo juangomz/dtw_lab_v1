@@ -3,7 +3,7 @@ run-name: "Build and Test by @${{ github.actor }}"
 on:
   push:
     branches:
-      -main
+      - main
 
 env:
   LOGIN_SERVER: ${{ secrets.LOGIN_SERVER }}
