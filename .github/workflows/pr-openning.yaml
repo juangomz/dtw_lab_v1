@@ -33,17 +33,13 @@ jobs:
     - name: Set up Docker
       uses: docker/setup-buildx-action@v2
 
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
-
     - name: Run unit tests
       run: poetry run pytest
 
     - name: Build Docker image
       run: |
-        docker build -t team5 .
+        chmod +x ./scripts/build.sh
 
     - name: Run integration tests
       run: |
-        chmod +x ./scripts/build.sh
         chmod +x ./scripts/integration_test.sh
