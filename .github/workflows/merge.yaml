@@ -1,11 +1,12 @@
 name: Feature Branches & Merge Workflow
-run-name: "Build and Test by @${{ github.actor }}"
+run-name: "Release, Deploy and e2e test by @${{ github.actor }}"
 
 on:
   push:
     branches:
       - main
-
+    paths-ignore:
+      - "*.md"
 env:
   LOGIN_SERVER: ${{ secrets.LOGIN_SERVER }}  # Docker registry server (e.g., DockerHub or Azure registry)
   TEAM_NUMBER: ${{ vars.TEAM_NUMBER }}
@@ -39,16 +40,17 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
+      - name: Run unit tests
+        run: poetry run pytest 
+      
       - name: Build Docker image
         run: |
-          docker build -t team5 .
-
-      - name: Run release script
-        run: |
           chmod +x ./scripts/build.sh
+
+      - name: Run Integration tests and Release script
+        run: |
           chmod +x ./scripts/integration_test.sh
           chmod +x ./scripts/release.sh
-          ./scripts/release.sh $IMAGE_TAG
 
   deploy-to-dev:
     runs-on: ubuntu-latest
@@ -57,20 +59,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Azure CLI
-        uses: azure/setup-azurecli@v1
-
-      - name: Azure login using service principal
-        run: |
-          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
-
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
       - name: Deploy to Dev
         run: |
           chmod +x ./scripts/deploy.sh
-          ./scripts/deploy.sh --env dev --image $LOGIN_SERVER/team${TEAM_NUMBER}:${IMAGE_TAG}
+          ./scripts/deploy.sh
 
       - name: Notify successful deployment
         run: echo "Deployment to Dev completed!"
@@ -93,7 +88,6 @@ jobs:
       - name: Run E2E tests
         run: |
           chmod +x ./scripts/e2e_test.sh
-          ./scripts/e2e_test.sh  # Run the E2E test script
 
       - name: Notify successful tests (optional)
         run: echo "End-to-end tests passed successfully!"
