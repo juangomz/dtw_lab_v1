@@ -11,10 +11,8 @@ env:
   LOGIN_SERVER: ${{ secrets.LOGIN_SERVER }}  # Docker registry server (e.g., DockerHub or Azure registry)
   TEAM_NUMBER: ${{ vars.TEAM_NUMBER }}
   RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
-  IMAGE_TAG: ${{ github.sha }}  # Use commit SHA as the image tag
   REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}  # Docker registry username
   REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}  # Docker registry password
-  DEV_API_KEY: ${{ secrets.DEV_API_KEY }}  # Secret for dev environment
 
 permissions: read-all
 
@@ -45,17 +43,24 @@ jobs:
       
       - name: Build Docker image
         run: |
-          ./scripts/build.sh
+          chmod +x ./scripts/build.sh
 
       - name: Run Integration tests and Release script
         run: |
-          ./scripts/integration_test.sh
-          ./scripts/release.sh
+          chmod +x ./scripts/integration_test.sh
+          chmod +x ./scripts/release.sh
 
   deploy-to-dev:
     runs-on: ubuntu-latest
     needs: release  # This job runs after the release job
     environment: development  # Triggers manual approval if set in GitHub Actions
+    env:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      PACKAGE_VERSION: ${{ needs.release.outputs.package-version }}
+      
     steps:
       - uses: actions/checkout@v3
 
@@ -64,7 +69,7 @@ jobs:
 
       - name: Deploy to Dev
         run: |
-          ./scripts/deploy.sh
+          chmod +x ./scripts/deploy.sh
           
       - name: Notify successful deployment
         run: echo "Deployment to Dev completed!"
