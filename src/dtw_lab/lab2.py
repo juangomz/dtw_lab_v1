@@ -25,26 +25,6 @@ def run_server(port: int = 80, reload: bool = False, host: str = "127.0.0.1"):
 def main_route():
     return {"message": "Hello world"}
 
-
-# Read CSV data from Google Drive
-def read_csv_from_google_drive(file_id: str) -> pd.DataFrame:
-    download_url = f'https://drive.google.com/uc?export=download&id={file_id}'
-    try:
-        s = requests.get(download_url).content   
-        return pd.read_csv(io.StringIO(s.decode('utf-8')))
-    except Exception as e:
-        raise ValueError(f"Unable to read CSV file from Google Drive: {str(e)}")
-
-# Clean the data
-def clean_data(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.dropna()
-    df = df.drop(columns=['Serial_Number', 'Voltage_Cutoff', 'Nominal_Voltage'])
-    df = df[(df['Avg_Operating_Temperature'] <= 100)]
-    df = df[(df['Days_Since_Production'] <= 20000)]
-    df = df[(df['Current_Voltage'] >= 0.5) & (df['Current_Voltage'] <= 2)]
-    df = df[df['Battery_Size'] != '9 - Volt']
-    return df
-
 # Route to get the statistic based on measure and column
 @app.get("/statistic/{measure}/{column}")
 def mock_dependencies(mocker):
@@ -113,7 +93,6 @@ def get_visualization(graph_type: str):
 # Route to get the version from pyproject.toml
 @app.get("/version")
 def get_visualization_version():
-    import toml
     pyproject = toml.load("pyproject.toml")
     version = pyproject["tool"]["poetry"]["version"]
     return {"version": version}
