@@ -65,8 +65,7 @@ jobs:
       - name: Deploy to Dev
         run: |
           chmod +x ./scripts/deploy.sh
-          ./scripts/deploy.sh
-
+          
       - name: Notify successful deployment
         run: echo "Deployment to Dev completed!"
 
