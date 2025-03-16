@@ -1,7 +1,8 @@
+
 # Usa Python 3.12 como imagen base
 FROM python:3.12
 
-# Instala dependencias del sistema
+# Install system dependencies, including Git and gnupg
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -10,24 +11,32 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     && rm -rf /var/lib/apt/lists/*
 
-# Instala Poetry
+# Install Poetry
 ENV POETRY_VERSION=1.8.5
 ENV POETRY_HOME=/opt/poetry
 ENV PATH="${POETRY_HOME}/bin:${PATH}"
 RUN curl -sSL https://install.python-poetry.org | python3 - --version ${POETRY_VERSION}
 
-# Establece el directorio de trabajo
+
+# Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copia los archivos de dependencias y los instala
+# Copia solo los archivos de dependencias primero (para aprovechar la caché de Docker)
 COPY pyproject.toml poetry.lock ./
-RUN poetry install --no-root --no-dev  # No instala dependencias de desarrollo para reducir tamaño
+
+# Instala Poetry en el contenedor
+# RUN pip install poetry
+
+# Instala las dependencias del proyecto usando Poetry
+RUN poetry install --no-root
 
 # Copia el resto del código fuente al contenedor
 COPY . .
 
-# Expone el puerto 80 para que Azure pueda acceder a la aplicación
+RUN poetry install
+
+# Expone el puerto 80 en el contenedor
 EXPOSE 80
 
-# Ejecuta la aplicación con Uvicorn
-CMD ["poetry", "run", "uvicorn", "dtw_lab.lab2:app", "--host", "0.0.0.0", "--port", "80"]
+# Usa Poetry para ejecutar la aplicación
+CMD ["poetry", "run", "start-server"]
