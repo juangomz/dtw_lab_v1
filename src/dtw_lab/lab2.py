@@ -27,18 +27,8 @@ def main_route():
 
 # Route to get the statistic based on measure and column
 @app.get("/statistic/{measure}/{column}")
-def mock_dependencies(mocker):
-    """Mockea las funciones externas usadas en get_statistic."""
-    mock_read_csv = mocker.patch("src.dtw_lab.lab2.read_csv_from_google_drive")
-    mock_clean_data = mocker.patch("src.dtw_lab.lab2.clean_data")
-    mock_calculate_statistic = mocker.patch("src.dtw_lab.lab2.calculate_statistic")
-
-    # Configurar valores de retorno simulados
-    mock_read_csv.return_value = {"fake": "data"}  # Simula un DataFrame leído
-    mock_clean_data.return_value = {"column": [1, 2, 3, 4, 5]}  # Simula datos limpios
-    mock_calculate_statistic.return_value = 3  # Simula el resultado del cálculo estadístico
-
-    return mock_read_csv, mock_clean_data, mock_calculate_statistic
+def get_statistic_endpoint(measure: str, column: str):
+    return get_statistic(measure, column)
 
 
 def test_get_statistic(mock_dependencies):
