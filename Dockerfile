@@ -36,7 +36,7 @@ COPY . .
 RUN poetry install
 
 # Expone el puerto 80 en el contenedor
-EXPOSE 80
+# EXPOSE 80
 
 # Usa Poetry para ejecutar la aplicación
 CMD ["poetry", "run", "start-server"]
