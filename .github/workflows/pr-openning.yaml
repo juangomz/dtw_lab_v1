@@ -39,7 +39,9 @@ jobs:
     - name: Build Docker image
       run: |
         chmod +x ./scripts/build.sh
+        ./scripts/build.sh
 
     - name: Run integration tests
       run: |
         chmod +x ./scripts/integration_test.sh
+        ./scripts/integration_test.sh
