@@ -94,7 +94,6 @@ jobs:
     steps:
     - name: Run E2E test
       run: |
-        chmod +x ./scripts/e2e_test.sh
         ./scripts/e2e_test.sh
 
     - name: Notify successful tests (optional)
