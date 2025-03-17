@@ -48,11 +48,14 @@ jobs:
       - name: Build Docker image
         run: |
           chmod +x ./scripts/build.sh
+          ./scripts/build.sh
 
       - name: Run Integration tests and Release script
         run: |
           chmod +x ./scripts/integration_test.sh
+          ./scripts/integration_test.sh
           chmod +x ./scripts/release.sh
+          ./scripts/release.sh
 
   deploy-to-dev:
     runs-on: ubuntu-latest
@@ -74,6 +77,7 @@ jobs:
       - name: Deploy to Dev
         run: |
           chmod +x ./scripts/deploy.sh
+          ./scripts/deploy.sh
           
       - name: Notify successful deployment
         run: echo "Deployment to Dev completed!"
@@ -96,6 +100,7 @@ jobs:
       - name: Run E2E tests
         run: |
           chmod +x ./scripts/e2e_test.sh
+          ./scripts/e2e_test.sh
 
       - name: Notify successful tests (optional)
         run: echo "End-to-end tests passed successfully!"
