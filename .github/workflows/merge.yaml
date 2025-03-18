@@ -1,3 +1,5 @@
+#!/bin/bash
+
 name: Feature Branches & Merge Workflow
 run-name: "Release, Deploy and e2e test by @${{ github.actor }}"
 
@@ -93,8 +95,14 @@ jobs:
     needs: deploy-to-dev
     steps:
     - uses: actions/checkout@v3
-
-    - name: Run E2E tests
+    
+    - name: Verificar ubicación del script
       run: |
-        chmod +x ./scripts/e2e_test.sh
-        ./scripts/e2e_test.sh
+        pwd
+        ls -l scripts/e2e_test.sh
+
+    - name: Asegurar permisos del script
+      run: chmod +x scripts/e2e_test.sh
+    
+    - name: Ejecutar E2E Test
+      run: ./scripts/e2e_test.sh
