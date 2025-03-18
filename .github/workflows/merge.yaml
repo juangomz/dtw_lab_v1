@@ -93,6 +93,9 @@ jobs:
     needs: deploy-to-dev
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Verificar existencia del script
+      run: ls -l scripts/ || echo "Directorio scripts/ no encontrado"
 
     - name: Run E2E tests
       run: |
